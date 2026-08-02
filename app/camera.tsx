@@ -1,9 +1,9 @@
 import { StyleSheet, Text, View } from "react-native";
 
-export default function TabOneScreen() {
+export default function ModalScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
+      <Text style={styles.title}>Camera</Text>
       <View style={styles.separator} />
     </View>
   );
