@@ -1,15 +1,17 @@
-import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
+import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import {
   CameraType,
   CameraView,
   FlashMode,
   useCameraPermissions,
 } from "expo-camera";
+import * as MediaLibrary from "expo-media-library";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   StyleSheet,
   Text,
@@ -33,16 +35,31 @@ export default function CameraScreen() {
     setFlash((oldState) => (oldState === "off" ? "on" : "off"));
   }
 
-  function takePicture() {
+  async function takePicture() {
     if (!cameraRef.current || takingPicture) return;
 
     setTakingPicture(true);
+    const mediaLibrary = await MediaLibrary.requestPermissionsAsync();
+
+    if (mediaLibrary.status !== "granted") {
+      Alert.alert(
+        "Permissão necessária",
+        "Permita o acesso às fotos para salvar na galeria.",
+      );
+      return;
+    }
+
     cameraRef.current
       .takePictureAsync()
       .then((photo) => {
-        console.log(photo?.uri);
+        MediaLibrary.saveToLibraryAsync(photo.uri).then(() =>
+          Alert.alert("Foto salva!"),
+        );
       })
-      .catch((error) => console.error(error))
+      .catch((error) => {
+        console.error(error);
+        Alert.alert("Erro", "Não foi possível capturar a foto");
+      })
       .finally(() => setTakingPicture(false));
   }
 
@@ -130,8 +147,8 @@ export default function CameraScreen() {
                   takingPicture && styles.captureButtonPressed,
                 ]}
               >
-                <MaterialCommunityIcons
-                  name="pokeball"
+                <MaterialIcons
+                  name="catching-pokemon"
                   size={takingPicture ? 56 : 64}
                   color="black"
                 />
