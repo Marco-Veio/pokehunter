@@ -1,5 +1,6 @@
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import {
+  BarcodeScanningResult,
   CameraType,
   CameraView,
   FlashMode,
@@ -26,6 +27,7 @@ export default function CameraScreen() {
   const [facing, setFacing] = useState<CameraType>("back");
   const [flash, setFlash] = useState<FlashMode>("off");
   const [takingPicture, setTakingPicture] = useState(false);
+  const [scanned, setScanned] = useState(false);
 
   function toggleCameraFacing() {
     setFacing((oldState) => (oldState === "back" ? "front" : "back"));
@@ -61,6 +63,13 @@ export default function CameraScreen() {
         Alert.alert("Erro", "Não foi possível capturar a foto");
       })
       .finally(() => setTakingPicture(false));
+  }
+
+  async function handleBarcodeScanned(result: BarcodeScanningResult) {
+    if (scanned) return;
+
+    setScanned(true);
+    Alert.alert("QR Code", result.data);
   }
 
   if (!permission) {
@@ -105,6 +114,10 @@ export default function CameraScreen() {
         ref={cameraRef}
         facing={facing}
         flash={flash}
+        barcodeScannerSettings={{
+          barcodeTypes: ["qr"],
+        }}
+        onBarcodeScanned={handleBarcodeScanned}
       />
 
       <SafeAreaView style={styles.overlay} edges={["top"]}>
