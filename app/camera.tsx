@@ -28,6 +28,7 @@ export default function CameraScreen() {
   const [flash, setFlash] = useState<FlashMode>("off");
   const [takingPicture, setTakingPicture] = useState(false);
   const [scanned, setScanned] = useState(false);
+  const [mode, setMode] = useState<"photo" | "scan">("scan");
 
   function toggleCameraFacing() {
     setFacing((oldState) => (oldState === "back" ? "front" : "back"));
@@ -117,7 +118,9 @@ export default function CameraScreen() {
         barcodeScannerSettings={{
           barcodeTypes: ["qr"],
         }}
-        onBarcodeScanned={handleBarcodeScanned}
+        onBarcodeScanned={
+          mode === "scan" && !scanned ? handleBarcodeScanned : undefined
+        }
       />
 
       <SafeAreaView style={styles.overlay} edges={["top"]}>
@@ -141,9 +144,42 @@ export default function CameraScreen() {
           </Pressable>
         </View>
 
+        {mode === "scan" && (
+          <View style={styles.scannerArea}>
+            <View style={styles.scannerFrame}>
+              <View style={[styles.scannerCorner, styles.scannerTopLeft]} />
+              <View style={[styles.scannerCorner, styles.scannerTopRight]} />
+              <View style={[styles.scannerCorner, styles.scannerBottomLeft]} />
+              <View style={[styles.scannerCorner, styles.scannerBottomRight]} />
+            </View>
+
+            <Text style={styles.scannerText}>
+              Aponte para o QRCode para capturar o Pokémon
+            </Text>
+          </View>
+        )}
+
         <View style={styles.bottomArea}>
           <View style={styles.modeContainer}>
-            <Text style={styles.activeMode}>FOTO</Text>
+            <Pressable onPress={() => setMode("scan")}>
+              <Text
+                style={
+                  mode === "scan" ? styles.activeMode : styles.inactiveMode
+                }
+              >
+                SCAN
+              </Text>
+            </Pressable>
+
+            <Pressable onPress={() => setMode("photo")}>
+              <Text
+                style={
+                  mode === "photo" ? styles.activeMode : styles.inactiveMode
+                }
+              >
+                FOTO
+              </Text>
+            </Pressable>
           </View>
 
           <View style={styles.cameraControls}>
@@ -152,7 +188,7 @@ export default function CameraScreen() {
             <Pressable
               style={styles.captureButtonOuter}
               onPress={takePicture}
-              disabled={takingPicture}
+              disabled={takingPicture || mode === "scan"}
             >
               <View
                 style={[
@@ -161,7 +197,7 @@ export default function CameraScreen() {
                 ]}
               >
                 <MaterialIcons
-                  name="catching-pokemon"
+                  name={mode === "photo" ? "catching-pokemon" : "qr-code-2"}
                   size={takingPicture ? 56 : 64}
                   color="black"
                 />
@@ -268,6 +304,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "semibold",
   },
+  inactiveMode: {
+    color: "#a3a3a3",
+    fontSize: 13,
+    fontWeight: "semibold",
+  },
   cameraControls: {
     flexDirection: "row",
     alignItems: "center",
@@ -307,5 +348,56 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 22,
     backgroundColor: "rgba(35,35,35,0.9)",
+  },
+  scannerArea: {
+    alignItems: "center",
+  },
+  scannerFrame: {
+    width: 240,
+    height: 240,
+    position: "relative",
+  },
+  scannerCorner: {
+    position: "absolute",
+    width: 45,
+    height: 45,
+    borderColor: "white",
+  },
+  scannerTopLeft: {
+    top: 0,
+    left: 0,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderTopLeftRadius: 12,
+  },
+  scannerTopRight: {
+    top: 0,
+    right: 0,
+    borderTopWidth: 4,
+    borderRightWidth: 4,
+    borderTopRightRadius: 12,
+  },
+  scannerBottomLeft: {
+    bottom: 0,
+    left: 0,
+    borderBottomWidth: 4,
+    borderLeftWidth: 4,
+    borderBottomLeftRadius: 12,
+  },
+  scannerBottomRight: {
+    bottom: 0,
+    right: 0,
+    borderBottomWidth: 4,
+    borderRightWidth: 4,
+    borderBottomRightRadius: 12,
+  },
+  scannerText: {
+    marginTop: 18,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 18,
+    color: "white",
+    fontSize: 14,
+    backgroundColor: "rgba(0,0,0,0.55)",
   },
 });
