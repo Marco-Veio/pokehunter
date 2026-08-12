@@ -1,3 +1,4 @@
+import { saveCapturedPokemon } from "@/services/storage";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import {
   BarcodeScanningResult,
@@ -6,6 +7,7 @@ import {
   FlashMode,
   useCameraPermissions,
 } from "expo-camera";
+import * as Location from "expo-location";
 import * as MediaLibrary from "expo-media-library";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -70,7 +72,30 @@ export default function CameraScreen() {
     if (scanned) return;
 
     setScanned(true);
-    Alert.alert("QR Code", result.data);
+
+    const pokemonId = Number(result.data);
+
+    if (!Number.isInteger(pokemonId) || pokemonId <= 0) {
+      Alert.alert(
+        "QR Code inválido",
+        "O QR Code deve conter o ID de um Pokémon.",
+        [
+          {
+            text: "Tentar novamente",
+            onPress: () => setScanned(false),
+          },
+        ],
+      );
+    }
+
+    const location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.High,
+    });
+    await saveCapturedPokemon(
+      pokemonId,
+      location.coords.latitude,
+      location.coords.longitude,
+    );
   }
 
   if (!permission) {
