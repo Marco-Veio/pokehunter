@@ -96,6 +96,7 @@ export default function CameraScreen() {
       location.coords.latitude,
       location.coords.longitude,
     );
+    router.push(`/pokemon/${pokemonId}`);
   }
 
   if (!permission) {
