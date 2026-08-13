@@ -1,11 +1,15 @@
 import CameraButton from "@/components/CameraButton";
 import PokemonItem from "@/components/PokemonItem";
 import { getPokemonList, Pokemon } from "@/services/pokeapi";
+import { clearCapturedPokemon, getCapturedPokemon } from "@/services/storage";
+import { FontAwesome } from "@expo/vector-icons";
+import { useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   StyleSheet,
   Text,
   View,
@@ -17,6 +21,7 @@ export default function PokedexScreen() {
   const [loading, setLoading] = useState(false);
   const [hasNextPage, setHasNextPage] = useState(true);
   const [offset, setOffset] = useState(0);
+  const [capturedIds, setCapturedIds] = useState<number[]>([]);
 
   const LIMIT = 20;
 
@@ -37,6 +42,19 @@ export default function PokedexScreen() {
       .finally(() => setLoading(false));
   }
 
+  function handleClear() {
+    clearCapturedPokemon();
+    setCapturedIds([]);
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      getCapturedPokemon().then((response) =>
+        setCapturedIds(response.map((pokemon) => pokemon.id)),
+      );
+    }, []),
+  );
+
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <StatusBar style="light" />
@@ -44,6 +62,10 @@ export default function PokedexScreen() {
       <View style={styles.main}>
         <View style={styles.header}>
           <Text style={styles.title}>Pokedex</Text>
+
+          <Pressable onPress={handleClear}>
+            <FontAwesome name="trash" size={20} color="red" />
+          </Pressable>
         </View>
 
         <FlatList
@@ -55,7 +77,7 @@ export default function PokedexScreen() {
               id={item.id}
               name={item.name}
               image={item.image}
-              captured={false}
+              captured={capturedIds.includes(item.id)}
             />
           )}
           contentContainerStyle={styles.list}
@@ -91,6 +113,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#1e1e1e",
     borderBottomWidth: 1,
     borderBottomColor: "#2f2f2f",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   title: {
     fontSize: 30,

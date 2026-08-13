@@ -1,8 +1,8 @@
-import { Pokemon } from "@/services/pokeapi";
+import { getPokemon, Pokemon } from "@/services/pokeapi";
 import { FontAwesome } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Link, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -13,11 +13,23 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PokemonScreen() {
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
 
   const [pokemon, setPokemon] = useState<Pokemon | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+
+  useEffect(() => {
+    if (id) {
+      getPokemon(id)
+        .then((response) => setPokemon(response))
+        .catch((error) => {
+          console.error(error);
+          setError(true);
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [id]);
 
   if (loading) {
     return (
@@ -36,20 +48,22 @@ export default function PokemonScreen() {
 
         <Text style={styles.errorText}>Pokémon não encontrado.</Text>
 
-        <Link href="/camera" asChild>
-          <TouchableOpacity style={styles.primaryButton}>
-            <FontAwesome name="camera" size={20} color="white" />
-            <Text style={styles.primaryButtonText}>Escanear novamente</Text>
-          </TouchableOpacity>
-        </Link>
+        <View style={styles.actions}>
+          <Link href="/camera" asChild>
+            <TouchableOpacity style={styles.primaryButton}>
+              <FontAwesome name="camera" size={20} color="white" />
+              <Text style={styles.primaryButtonText}>Escanear novamente</Text>
+            </TouchableOpacity>
+          </Link>
 
-        <Link href="/(tabs)" asChild>
-          <TouchableOpacity style={styles.secondaryButton}>
-            <Text style={styles.secondaryButtonText}>
-              Voltar à tela inicial
-            </Text>
-          </TouchableOpacity>
-        </Link>
+          <Link href="/(tabs)" asChild>
+            <TouchableOpacity style={styles.secondaryButton}>
+              <Text style={styles.secondaryButtonText}>
+                Voltar à tela inicial
+              </Text>
+            </TouchableOpacity>
+          </Link>
+        </View>
       </SafeAreaView>
     );
   }

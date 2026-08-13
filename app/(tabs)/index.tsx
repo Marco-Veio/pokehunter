@@ -1,12 +1,9 @@
+import { CapturedPokemon, getCapturedPokemon } from "@/services/storage";
 import * as Location from "expo-location";
-import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import MapView from "react-native-maps";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 
 interface Coordinates {
   latitude: number;
@@ -16,6 +13,7 @@ interface Coordinates {
 export default function MapScreen() {
   const [location, setLocation] = useState<Coordinates | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [capturedPokemon, setCapturedPokemon] = useState<CapturedPokemon[]>([]);
 
   async function getLocation() {
     const permission = await Location.requestForegroundPermissionsAsync();
@@ -38,6 +36,12 @@ export default function MapScreen() {
   useEffect(() => {
     getLocation();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      getCapturedPokemon().then((response) => setCapturedPokemon(response));
+    }, []),
+  );
 
   if (error) {
     return (
@@ -67,7 +71,21 @@ export default function MapScreen() {
       }}
       showsUserLocation
       showsMyLocationButton
-    />
+    >
+      {capturedPokemon.map((pokemon) => (
+        <Marker
+          key={pokemon.id}
+          coordinate={{
+            latitude: pokemon.latitude,
+            longitude: pokemon.longitude,
+          }}
+          title={`Pokémon #${String(pokemon.id).padStart(4, "0")}`}
+          description="Toque para visualizar"
+          pinColor="red"
+          onPress={() => router.push(`/pokemon/${pokemon.id}`)}
+        />
+      ))}
+    </MapView>
   );
 }
 
