@@ -73,7 +73,7 @@ export default function PokemonScreen() {
       <View style={styles.container}>
         <View style={styles.content}>
           <View style={styles.captureBadge}>
-            <FontAwesome name="check" size={16} color="green" />
+            <FontAwesome name="check" size={16} color="white" />
             <Text style={styles.captureBadgeText}>Pokémon capturado!</Text>
           </View>
 

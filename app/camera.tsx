@@ -1,5 +1,6 @@
 import { saveCapturedPokemon } from "@/services/storage";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
+import { useIsFocused } from "@react-navigation/native";
 import {
   BarcodeScanningResult,
   CameraType,
@@ -31,6 +32,7 @@ export default function CameraScreen() {
   const [takingPicture, setTakingPicture] = useState(false);
   const [mode, setMode] = useState<"photo" | "scan">("scan");
   const scanned = useRef(false);
+  const isFocused = useIsFocused();
 
   function toggleCameraFacing() {
     setFacing((oldState) => (oldState === "back" ? "front" : "back"));
@@ -146,7 +148,9 @@ export default function CameraScreen() {
           barcodeTypes: ["qr"],
         }}
         onBarcodeScanned={
-          mode === "scan" && !scanned ? handleBarcodeScanned : undefined
+          mode === "scan" && !scanned.current && isFocused
+            ? handleBarcodeScanned
+            : undefined
         }
       />
 
