@@ -1,0 +1,62 @@
+import { ExpoConfig, ConfigContext } from "expo/config";
+
+export default ({ config }: ConfigContext): ExpoConfig => ({
+  ...config,
+
+  name: "pokehunter",
+  slug: "pokehunter",
+  version: "1.0.0",
+  orientation: "portrait",
+  icon: "./assets/images/icon.png",
+  scheme: "pokehunter",
+  userInterfaceStyle: "automatic",
+  newArchEnabled: true,
+
+  splash: {
+    image: "./assets/images/splash-icon.png",
+    resizeMode: "contain",
+    backgroundColor: "#ffffff",
+  },
+
+  ios: {
+    supportsTablet: true,
+  },
+
+  android: {
+    adaptiveIcon: {
+      foregroundImage: "./assets/images/adaptive-icon.png",
+      backgroundColor: "#ffffff",
+    },
+    edgeToEdgeEnabled: true,
+    predictiveBackGestureEnabled: false,
+    package: "com.marcoveio.pokehunter",
+  },
+
+  web: {
+    bundler: "metro",
+    output: "static",
+    favicon: "./assets/images/favicon.png",
+  },
+
+  plugins: [
+    "expo-router",
+    [
+      "react-native-maps",
+      {
+        androidGoogleMapsApiKey:
+          process.env.GOOGLE_MAPS_API_KEY,
+      },
+    ],
+  ],
+
+  experiments: {
+    typedRoutes: true,
+  },
+
+  extra: {
+    router: {},
+    eas: {
+      projectId: "cc73e35a-c878-4c93-abc4-e173f7f5af57",
+    },
+  },
+});
